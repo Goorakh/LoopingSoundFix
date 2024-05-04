@@ -76,10 +76,7 @@ namespace LoopingSoundFix
             // Why this isn't a completely separate API call is beyond me
             AKRESULT result = AkSoundEngine.GetPlayingIDsFromGameObject(gameObject, ref numPlayingIds, null);
             if (result != AKRESULT.AK_Success)
-            {
-                Log.Error($"Failed to get number of playing events on {gameObject}: {result}");
                 return;
-            }
 
             if (numPlayingIds <= 0)
                 return;
@@ -93,10 +90,7 @@ namespace LoopingSoundFix
             
             result = AkSoundEngine.GetPlayingIDsFromGameObject(gameObject, ref numPlayingIds, _sharedPlayingIdsBuffer);
             if (result != AKRESULT.AK_Success)
-            {
-                Log.Error($"Failed to get playing events on {gameObject}: {result}");
                 return;
-            }
 
             for (int i = 0; i < numPlayingIds; i++)
             {
