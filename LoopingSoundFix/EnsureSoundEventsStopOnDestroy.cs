@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MonoMod.RuntimeDetour;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -64,19 +65,29 @@ namespace LoopingSoundFix
             _hooks.Clear();
         }
 
-        static uint[] _sharedPlayingIdsBuffer;
+        static uint[] _sharedPlayingIdsBuffer = new uint[16];
         static void stopAllSoundEvents(GameObject gameObject)
         {
-            uint numPlayingIds = 0;
-
-            // From Wwise docs:
-            // * Note: It is possible to call GetPlayingIDsFromGameObject with io_ruNumItems = 0 to get the total size of the structure that should be allocated for out_aPlayingIDs.
-            //
-            // (When it is called this way, the out_aPlayingIDs parameter is ignored)
-            // Why this isn't a completely separate API call is beyond me
-            AKRESULT result = AkSoundEngine.GetPlayingIDsFromGameObject(gameObject, ref numPlayingIds, null);
-            if (result != AKRESULT.AK_Success)
+            if (!gameObject)
                 return;
+
+            uint numPlayingIds;
+            do
+            {
+                numPlayingIds = (uint)_sharedPlayingIdsBuffer.Length;
+                AKRESULT result = AkSoundEngine.GetPlayingIDsFromGameObject(gameObject, ref numPlayingIds, _sharedPlayingIdsBuffer);
+                if (result != AKRESULT.AK_Success)
+                    return;
+
+                if (numPlayingIds >= _sharedPlayingIdsBuffer.Length)
+                {
+                    Array.Resize(ref _sharedPlayingIdsBuffer, _sharedPlayingIdsBuffer.Length * 2);
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
 
             if (numPlayingIds <= 0)
                 return;
@@ -84,13 +95,6 @@ namespace LoopingSoundFix
 #if DEBUG
             Log.Debug($"Stopping {numPlayingIds} audio event(s) for {gameObject}");
 #endif
-
-            if (_sharedPlayingIdsBuffer == null || _sharedPlayingIdsBuffer.LongLength < numPlayingIds)
-                _sharedPlayingIdsBuffer = new uint[numPlayingIds];
-            
-            result = AkSoundEngine.GetPlayingIDsFromGameObject(gameObject, ref numPlayingIds, _sharedPlayingIdsBuffer);
-            if (result != AKRESULT.AK_Success)
-                return;
 
             for (int i = 0; i < numPlayingIds; i++)
             {
