@@ -2,7 +2,7 @@
 	"name": "LoopingSoundFix",
 	"authorName": "Gorakh",
 	"displayName": "Looping Sound Fix",
-	"version_number": "1.1.0",
+	"version_number": "1.1.1",
 	"website_url": "https://github.com/Goorakh/LoopingSoundFix",
 	"description": "Fixes looping sounds sometimes not ending and playing indefinitely. Clientside.",
 	"dependencies": [
