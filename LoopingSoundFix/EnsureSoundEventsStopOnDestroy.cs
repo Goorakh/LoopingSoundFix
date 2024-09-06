@@ -30,7 +30,7 @@ namespace LoopingSoundFix
             }
 
             // These are never actually called, but hook them just to be sure
-            MethodInfo AkSoundEngine_UnregisterGameObjInternal_MI = SymbolExtensions.GetMethodInfo(() => AkSoundEngine.UnregisterGameObjInternal(default));
+            MethodInfo AkSoundEngine_UnregisterGameObjInternal_MI = SymbolExtensions.GetMethodInfo(() => AkSoundEngine.UnregisterGameObjInternal(default(GameObject)));
             if (AkSoundEngine_UnregisterGameObjInternal_MI != null)
             {
                 _hooks.Add(new Hook(AkSoundEngine_UnregisterGameObjInternal_MI, AkSoundEngine_UnregisterGameObjInternal));
@@ -99,7 +99,6 @@ namespace LoopingSoundFix
             for (int i = 0; i < numPlayingIds; i++)
             {
                 uint playingId = _sharedPlayingIdsBuffer[i];
-                _sharedPlayingIdsBuffer[i] = 0;
 
                 switch (Main.SoundCancelMode)
                 {
